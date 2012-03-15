@@ -1,0 +1,55 @@
+
+\documentclass[runningheads,a4paper]{report}
+\usepackage{listings}
+\usepackage{color}
+\lstset{breaklines=true}
+
+
+% Title Page
+\title{CG2271 RTOS Lab 6 --- Synchronization Mechanisms}
+\author{Divyanshu Arora(U096857U), Omer Iqbal(MATRIC\_NO\_HERE)}
+
+
+\begin{document}
+\maketitle
+\section*{Q1}
+\subsection*{Output}
+\lstset{language=C, caption=Output of program from lab manual,
+  label=Output, numbers=left, frame=shadowbox,
+  rulesepcolor=\color{black}}
+\begin{lstlisting}
+PRINT: Current value of ctr is 0
+PRINT: ctr is too small. Zzzz.. g'night!
+ADD: New value of ctr is 1
+ADD: New value of ctr is 2
+ADD: New value of ctr is 3
+ADD: New value of ctr is 4
+ADD: New value of ctr is 5
+ADD: New value of ctr is 6
+ADD: New value of ctr is 7
+ADD: New value of ctr is 8
+ADD: New value of ctr is 9
+ADD: New value of ctr is 10
+ADD: Reached limit of 10! Waking up print thread
+PRINT: ctr is now 10! Exiting thread.
+\end{lstlisting}
+
+\subsection*{Description}
+
+The program spawns two threads---\texttt{add} and \texttt{print}. It
+uses a condition variable \texttt{ctr\_cond} alongwith the
+accompanying mutex \texttt{ctr\_mutex} to ensure that the
+\texttt{print} thread doesn't print and exit until the condition
+$ctr>=MAX\_COUNT$ has been met.
+This condition can only be met by execution of the other thread, which
+increments the \texttt{ctr} variable if necessary, and signals
+\texttt{ctr\_cond} to wake up one of the threads waiting on it when it
+is done.
+
+
+
+
+
+
+
+\end{document}
