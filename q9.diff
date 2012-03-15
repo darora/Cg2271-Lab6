@@ -1,0 +1,105 @@
+diff --git a/Makefile b/Makefile
+index 00b4d67..664d763 100644
+--- a/Makefile
++++ b/Makefile
+@@ -3,6 +3,8 @@ all: clean build
+ clean:
+ 	rm -f 1
+ 	rm -f 2
++	rm -f 3
+ build:
+ 	clang -pthread lab6_1.c -o 1
+ 	clang -pthread lab6_2.c -o 2
++	clang -pthread lab6_3.c pcomm.c -o 3
+diff --git a/lab6_3.c b/lab6_3.c
+index 91225f6..c8b0fb4 100644
+--- a/lab6_3.c
++++ b/lab6_3.c
+@@ -44,7 +44,7 @@ int main()
+   pthread_t write_threads[5];
+ 
+   // Create the queue
+-  queue=pq_create(100);
++  queue=pq_create(10);
+ 
+   pthread_create(&read_thread, NULL, reader, NULL);
+ 
+diff --git a/pcomm.c b/pcomm.c
+index c910bf4..272640d 100644
+--- a/pcomm.c
++++ b/pcomm.c
+@@ -13,6 +13,8 @@ pq_t *pq_create(int size)
+     tmp->q = (int *) calloc((size_t) size, sizeof(int));
+     if(tmp->q)
+       {
++        pthread_mutex_init(&(tmp->mutex), NULL);
++        pthread_cond_init(&(tmp->empty), NULL);
+         tmp->head=0;
+         tmp->tail=0;
+         tmp->size=size;
+@@ -32,36 +34,43 @@ void pq_destroy(pq_t *q)
+ {
+   if(q)
+   {
+-    if(q->q)
++    if(q->q) {
+       free(q->q);
++      pthread_mutex_destroy(&(q->mutex));
++      pthread_cond_destroy(&(q->empty));
++    }
+     free(q);
+   }
+ }
+ 
+ void pq_put(pq_t *q, int b)
+ {
+-        // Exit if full.
+-  if(q->count == q->size)
+-    return;
++  pthread_mutex_lock(&(q->mutex));
++  while (q->count == q->size)
++    pthread_cond_wait(&(q->empty), &(q->mutex));
+ 
+   // No longer full. Now add in the item
+   q->q[q->head]= b;
+   q->head = (q->head + 1) % q->size;
+   q->count++;
++  if (q->count == 1)
++    pthread_cond_broadcast(&(q->empty));
++  pthread_mutex_unlock(&(q->mutex));
+ }
+ 
+ int pq_get(pq_t *q)
+ {
++  pthread_mutex_lock(&(q->mutex));
+   int ret;
+-
+-        // Exit if empty
+-  if(q->count == 0)
+-    return -999;
++  while (q->count == 0)
++    pthread_cond_wait(&(q->empty), &(q->mutex));
+ 
+   // We now have something to read.
+   ret=q->q[q->tail];
+   q->tail = (q->tail + 1) % q->size;
+   q->count--;
+-
++  if (q->count == q->size-1)
++    pthread_cond_broadcast(&(q->empty));
++  pthread_mutex_unlock(&(q->mutex));
+   return ret;
+ }
+diff --git a/pcomm.h b/pcomm.h
+index 05933b1..33b753c 100644
+--- a/pcomm.h
++++ b/pcomm.h
+@@ -7,6 +7,8 @@ typedef struct t
+   int size;
+   int count;
+   int *q;
++  pthread_cond_t empty;
++  pthread_mutex_t mutex;
+ } pq_t;
+ 
+ pq_t *pq_create(int);

@@ -129,4 +129,57 @@ before calling \texttt{pthread\_cond\_wait}. This ensures that the
 \texttt{main} thread can go on creating the \texttt{add} thread as
 before and execute it.
 
+\section*{Q7}
+
+Expected answer is $49*(49+1)/2$, or $1225$.
+
+\section*{Q8}
+
+The program doesn't give the correct answer.
+
+The library specifications mention that the \texttt{pq\_get} call
+should block if the queue is empty. However, the given skeleton
+implementation returns a designated error code (\textit{-999}). The
+test suite, of course, follows the specifications, and instead treats
+\textit{-999} as just any other number from the queue.
+
+\section*{Q9}
+
+Changes made are ---
+
+\begin{itemize}
+  \item Added \texttt{mutex}, \texttt{\texttt{empty}} cond\_var to the \texttt{pq\_t} struct.
+  \item Initialize aforementioned variables in the \texttt{pq\_create}
+    function, and destroy them in \texttt{pq\_destroy}
+  \item Use the mutex \& condition variable to block the
+    \texttt{pq\_put} and \texttt{pq\_get} functions if necessary, and
+    to call \texttt{pthread\_cond\_broadcast} to unblock as appropriate.
+\end{itemize}
+
+A diff of the exact changes made is attached---
+\lstset{caption=Changes made to the queue library to follow the specs
+  provided}
+\lstinputlisting{./q9.diff}
+
+\section*{Q10}
+
+Changes made are ---
+\begin{itemize}
+  \item Included \texttt{semaphore.h} and added a global
+    \texttt{sem\_t} variable, which is given an initial value of $6$,
+    i.e. the number of readers + the number of writers.
+  \item The \texttt{main} thread calls \texttt{sem\_wait} on the
+    semaphore before it spawns off a new thread.
+  \item Each of the reader \& writer threads call \texttt{sem\_post}
+    on  the semaphore just before exiting.
+  \item The \texttt{main} thread calls \texttt{sem\_wait} once more
+    just before calling \texttt{pq\_destroy} on the queue.
+\end{itemize}
+
+A diff of the exact changes is attached---
+
+\lstset{caption=Changes made to enable calling \texttt{pq\_destroy} on
+  the queue.}
+\lstinputlisting{./q10.diff}
+
 \end{document}

@@ -1,0 +1,61 @@
+diff --git a/lab6_3.c b/lab6_3.c
+index c8b0fb4..f14de2b 100644
+--- a/lab6_3.c
++++ b/lab6_3.c
+@@ -1,8 +1,10 @@
+ #include <stdio.h>
+ #include <pthread.h>
++#include <semaphore.h>
+ #include "pcomm.h"
+ 
+ pq_t *queue;
++sem_t semaphore;
+ 
+ void *reader(void *p)
+ {
+@@ -19,6 +21,7 @@ void *reader(void *p)
+     }
+ 
+   printf("Final sum of numbers read from the queue is %d\n", sum);
++  sem_post(&semaphore);
+   pthread_exit(NULL);
+ }
+ 
+@@ -34,6 +37,7 @@ void *writer(void *p)
+       sleep(1);
+     }
+   printf("Writer thread %d exiting\n", p);
++  sem_post(&semaphore);
+   pthread_exit(NULL);
+ }
+ 
+@@ -42,17 +46,23 @@ int main()
+   int i;
+   pthread_t read_thread;
+   pthread_t write_threads[5];
+-
++  sem_init(&semaphore, 0, 6);
+   // Create the queue
+   queue=pq_create(10);
+-
++  
++  sem_wait(&semaphore);
+   pthread_create(&read_thread, NULL, reader, NULL);
+-
++  
+   // Launch threads 
+-  for(i=0; i<5; i++)
++  for(i=0; i<5; i++) {
++    sem_wait(&semaphore);
+     pthread_create(&write_threads[i], NULL, writer, (void *) i);
+-
+-  //pq_destroy(queue);
++  }
++  
++  sem_wait(&semaphore);
++  pq_destroy(queue);
++  printf("Destroying!");
++  sem_destroy(&semaphore);
+   pthread_exit(NULL);
+   return 0;
+ }
