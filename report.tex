@@ -13,7 +13,7 @@
 \begin{document}
 \maketitle
 \section*{Q1}
-\subsection*{Output}
+\subsection{Output}
 \lstset{language=C, caption=Output of program from lab manual,
   label=Output, numbers=left, frame=shadowbox,
   rulesepcolor=\color{black}}
@@ -34,7 +34,7 @@ ADD: Reached limit of 10! Waking up print thread
 PRINT: ctr is now 10! Exiting thread.
 \end{lstlisting}
 
-\subsection*{Description}
+\subsection{Description}
 
 The program spawns two threads---\texttt{add} and \texttt{print}. It
 uses a condition variable \texttt{ctr\_cond} alongwith the
@@ -46,7 +46,24 @@ increments the \texttt{ctr} variable if necessary, and signals
 \texttt{ctr\_cond} to wake up one of the threads waiting on it when it
 is done.
 
+\section*{Q2}
 
+From the \textit{POSIX Programmer's Manual} page on
+\texttt{pthread\_cond\_wait}---
+\begin{quotation}
+[...]
+These functions[\texttt{pthread\_cond\_wait} \& \texttt{pthread\_cond\_timedwait}] atomically release \texttt{mutex}
+  and cause the calling thread to block on the condition variable
+  \texttt{cond}; atomically here means ``atomically with respect to access by another thread to the mutex and  then  the  condition
+       variable''.  That  is, if another thread is able to acquire the mutex after the about-to-block thread has released it, then a subsequent call to \texttt{pthread\_cond\_broadcast()} or \texttt{pthread\_cond\_signal()} in that thread shall behave as
+       if it were issued after the about-to-block thread has blocked. [...]
+\end{quotation}
+
+Since the \texttt{ctr\_mutex} variable is released by the
+\texttt{pthread\_cont\_wait} call, there is no possibility for
+deadlock.
+
+\section*{Q3}
 
 
 
