@@ -44,7 +44,7 @@ int main()
   pthread_t write_threads[5];
 
   // Create the queue
-  queue=pq_create(100);
+  queue=pq_create(10);
 
   pthread_create(&read_thread, NULL, reader, NULL);
 

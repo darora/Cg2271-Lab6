@@ -7,6 +7,8 @@ typedef struct t
   int size;
   int count;
   int *q;
+  pthread_cond_t empty;
+  pthread_mutex_t mutex;
 } pq_t;
 
 pq_t *pq_create(int);
