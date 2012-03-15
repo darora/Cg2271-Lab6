@@ -65,7 +65,25 @@ deadlock.
 
 \section*{Q3}
 
+The first thread to call \texttt{sem\_wait} doesn't have to block,
+because the call to \texttt{sem\_init} is passed an initial value of
+\texttt{1}. After the first thread decrements the value, it
+will still be non-zero, and therefore not block.
 
+\section*{Q4}
+
+One thread is woken up each time the main thread calls
+\texttt{sem\_post}.
+
+\section*{Q5}
+
+\begin{itemize}
+  \item Mutex provides mutual exclusion to a resource, i.e. only one
+    thread can access the resource at a time. A semaphore can provide
+    access to a user-defined number of threads.
+  \item A semaphore can be shared between processes, whereas a mutex
+    can't.
+\end{itemize}
 
 
 
