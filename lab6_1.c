@@ -29,6 +29,8 @@ void *print(void *p)
   if(ctr < MAX_COUNT)
     {
       printf("PRINT: ctr is too small. Zzzz.. g'night!\n");
+      pthread_cond_signal(&ctr_cond); //wake up main, and allow it to
+                                      //create add thread
       pthread_cond_wait(&ctr_cond, &ctr_mutex);
       printf("PRINT: ctr is now %d! Exiting thread.\n", ctr);
     }
@@ -41,8 +43,13 @@ int main()
   ctr=0;
   pthread_mutex_init(&ctr_mutex, NULL);
   pthread_cond_init(&ctr_cond, NULL);
-  pthread_create(&threads[0], NULL, add, NULL);
   pthread_create(&threads[1], NULL, print, NULL);
+
+  pthread_mutex_lock(&ctr_mutex);
+  pthread_cond_wait(&ctr_cond, &ctr_mutex);
+  pthread_create(&threads[0], NULL, add, NULL);
+  pthread_mutex_unlock(&ctr_mutex);
+
   pthread_join(threads[1], NULL);
   pthread_mutex_destroy(&ctr_mutex);
   pthread_cond_destroy(&ctr_cond);
